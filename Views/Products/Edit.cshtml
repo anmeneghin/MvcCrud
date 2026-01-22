@@ -1,0 +1,68 @@
+﻿@model MvcCrud.Models.Product
+@{
+    ViewData["Title"] = "Editar Produto";
+}
+
+<!--
+  View de edição.
+  - O input hidden para Id preserva a chave primária ao submeter o formulário.
+  - A lógica de validação e limitação de casas decimais é a mesma do Create.
+-->
+<h1>Editar Produto</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control decimal" type="text" inputmode="decimal" data-decimals="2" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            if (window.jQuery && jQuery.validator && jQuery.validator.methods) {
+                jQuery.validator.methods.number = function (value, element) {
+                    return this.optional(element) || /^-?\d+([,\.]\d+)?$/.test(value);
+                };
+            }
+
+            function enforceDecimals(el) {
+                const maxDecimals = parseInt(el.dataset.decimals ?? "2", 10);
+                let v = el.value;
+                v = v.replace(/\./g, ',');
+                v = v.replace(/[^0-9,]/g, '');
+                const firstComma = v.indexOf(',');
+                if (firstComma >= 0) {
+                    const intPart = v.slice(0, firstComma);
+                    const fracPart = v.slice(firstComma + 1, firstComma + 1 + maxDecimals);
+                    v = intPart + ',' + fracPart;
+                }
+                el.value = v;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('input.decimal').forEach(function (input) {
+                    input.addEventListener('input', function () { enforceDecimals(input); });
+                    input.addEventListener('paste', function (e) {
+                        setTimeout(function () { enforceDecimals(input); }, 0);
+                    });
+                });
+            });
+        })();
+    </script>
+}

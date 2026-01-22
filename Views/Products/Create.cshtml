@@ -1,0 +1,93 @@
+﻿@model MvcCrud.Models.Product
+@{
+    ViewData["Title"] = "Criar Produto";
+}
+<!--
+  View para criar um novo produto.
+  -  model define o tipo de objeto esperado pela view (Product).
+  - Os helpers asp-for conectam inputs às propriedades do modelo e geram o name/id corretos.
+-->
+<h1>Criar Produto</h1>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <!-- Label e input para o nome do produto -->
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <!-- Mensagem de validação para Name (ex.: "O campo Name é obrigatório") -->
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <!-- Label e input para o preço.
+             Usamos o asp-for para que o nome/id sejam "Price" e o model binding funcione. -->
+        <label asp-for="Price" class="form-label"></label>
+        <!--
+          Input comum (type padrão). Em outros exemplos transformamos para type="text"
+          e adicionamos scripts para aceitar vírgula e limitar 2 casas decimais.
+        -->
+        <input asp-for="Price" class="form-control decimal" />
+        <!-- Mensagem de validação para Price -->
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <!--
+      Partial que carrega os scripts de validação do ASP.NET (jQuery, jQuery Validate e adapters).
+      Deve ficar antes de qualquer override do método number do jQuery Validate.
+    -->
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            // Sobrescreve a regra "number" do jQuery Validate para aceitar vírgula ou ponto.
+            // Isso é necessário em locais que usam pt-BR (vírgula como separador decimal).
+            if (window.jQuery && jQuery.validator && jQuery.validator.methods) {
+                jQuery.validator.methods.number = function (value, element) {
+                    return this.optional(element) || /^-?\d+([,\.]\d+)?$/.test(value);
+                };
+            }
+
+            // Script que limita a quantidade de casas decimais enquanto o usuário digita/cola.
+            function enforceDecimals(el) {
+                const maxDecimals = 2; // aqui fixamos 2 casas decimais
+                let v = el.value;
+
+                // Converter ponto para vírgula (apenas para a interface em pt-BR)
+                v = v.replace(/\./g, ',');
+
+                // Remover caracteres que não são dígitos nem vírgula
+                v = v.replace(/[^0-9,]/g, '');
+
+                const firstComma = v.indexOf(',');
+                if (firstComma >= 0) {
+                    const intPart = v.slice(0, firstComma);
+                    const fracPart = v.slice(firstComma + 1, firstComma + 1 + maxDecimals);
+                    v = intPart + ',' + fracPart;
+                }
+
+                el.value = v;
+            }
+
+            // Anexa listeners para inputs com a classe .decimal
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('input.decimal').forEach(function (input) {
+                    input.addEventListener('input', function () { enforceDecimals(input); });
+                    input.addEventListener('paste', function () {
+                        setTimeout(function () { enforceDecimals(input); }, 0);
+                    });
+                });
+            });
+        })();
+    </script>
+}

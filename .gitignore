@@ -1,0 +1,28 @@
+﻿# Visual Studio / .NET
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.ide/
+*.log
+
+# JetBrains
+.idea/
+
+# Rider
+.idea/
+
+# EF & DB
+*.db
+*.mdf
+*.ldf
+
+# User secrets / publish
+secrets.json
+appsettings.*.json
+
+# NuGet
+*.nupkg
+packages/
